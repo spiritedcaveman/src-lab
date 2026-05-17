@@ -1,0 +1,26 @@
+name: Lab Sync
+on:
+  schedule:
+    - cron: "0 */2 * * *       # Runs every 2 hours to save runner cycles
+  workflow_dispatch:           # Allows manual execution via the GitHub UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Git and Mirror Upstream
+        env:
+          CB_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          # 1. Clone upstream as a bare mirror repository
+          git clone --mirror https://github.com/openbsd/src.git openbsd-src.git
+          cd openbsd-src.git
+
+          # 2. Add Codeberg target remote
+          git remote add codeberg https://codeberg.org/spiritedcaveman/openBSD-lab.git
+
+          # 3. Use Git extraheader config to pass token securely instead of the URL string
+          git config --local http.https://codeberg.org/.extraheader "Authorization: Basic $(echo -n "spiritedcaveman:$CB_TOKEN" | base64)"
+
+          # 4. Atomic force mirror push (Handles branches, tags, and deletions cleanly)
+          git push --force --mirror codeberg
