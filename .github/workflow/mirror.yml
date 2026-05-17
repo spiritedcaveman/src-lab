@@ -1,7 +1,7 @@
 name: Lab Sync
 on:
   schedule:
-    - cron: "0 */2 * * *       # Runs every 2 hours to save runner cycles
+    - cron: "0 */2 * * *"       # Runs every 2 hours to save runner cycles
   workflow_dispatch:           # Allows manual execution via the GitHub UI
 
 jobs:
