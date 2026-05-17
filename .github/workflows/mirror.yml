@@ -1,21 +1,21 @@
 name: Lab Sync
 on:
   schedule:
-    - cron: "0 */2 * * *"     # Runs every 2 hours to save runner cycles
-  workflow_dispatch:         # Allows manual execution via the GitHub UI
+    - cron: "*/7 * * * *" 
+  workflow_dispatch:      
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure Git and Mirror Upstream
+      - name: Force Sync All Tags
         run: |
-          # 1. Clone upstream as a bare mirror repository
-          git clone --mirror https://github.com/openbsd/src.git openbsd-src.git
-          cd openbsd-src.git
-
-          # 2. Add Codeberg target remote with token authentication injected directly
+          git clone --mirror https://github.com/openbsd/src.git open.git
+          cd open.git
           git remote add codeberg https://${{ secrets.CODEBERG_TOKEN }}@codeberg.org/spiritedcaveman/openBSD-lab.git
           
-          # 3. Atomic force mirror push (Handles branches, tags, and deletions cleanly)
-          git push --force --mirror codeberg
+          # Force push all tags specifically
+          git push --force codeberg --tags
+          
+          # Then sync the branches
+          git push --force codeberg master
